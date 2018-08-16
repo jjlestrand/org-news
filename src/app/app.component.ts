@@ -2,13 +2,15 @@ import {Component, ViewChild} from '@angular/core';
 import {AlertController, Events, IonicApp, MenuController, Nav, Platform, Tabs} from 'ionic-angular';
 import {StatusBar} from '@ionic-native/status-bar';
 import {SplashScreen} from '@ionic-native/splash-screen';
-
 import {HomePage} from '../pages/home/home';
 import {ListPage} from '../pages/list/list';
-import {AuthService, AuthState} from "./services/auth-service";
-import {CommonService} from "./services/common-service";
 import {AndroidPermissions} from "@ionic-native/android-permissions";
 import {TabsPage} from "../pages/tabs/tabs";
+import {CommonService} from "../services/common-service";
+import {AuthService, AuthState} from "../services/auth-service";
+import {HttpClient} from "@angular/common/http";
+import {MigrationService} from "../services/migration-service";
+import {NetworkProvider} from "../services/network.service";
 
 interface GlobalEventPayload {
     type: string; // redirect, authorization,
@@ -32,10 +34,13 @@ export class MyApp {
                 public splashScreen: SplashScreen,
                 public menuCtrl: MenuController,
                 public alertCtrl: AlertController,
+                public migrationService: MigrationService,
                 public event: Events,
                 public commonService: CommonService,
                 public androidPermissions: AndroidPermissions,
+                public networkProvider: NetworkProvider,
                 public ionicApp: IonicApp,
+                public http: HttpClient,
                 public authProvider: AuthService) {
         this.initializeApp();
 
@@ -53,11 +58,13 @@ export class MyApp {
             // Here you can do any higher level native things you might need.
             this.statusBar.styleDefault();
             this.splashScreen.hide();
-            this.menuCtrl.enable(false);
-            this.registerBackEvent();
-            this.globalSubscriber();
-            this.authProvider.isLoggedIn();
-            if (this.platform.is('cordova')) {
+            this.migrationService.run(); // running Migrations
+            this.networkProvider.setConnection(); // setting network status
+            this.menuCtrl.enable(true); // initial menuCtrl status
+            this.registerBackEvent(); // registering page back event
+            this.globalSubscriber(); // initializing global subscriber
+            this.authProvider.isLoggedIn(); // setting user login
+            if (this.platform.is('cordova')) {  // demanding for permission if
                 setTimeout(() => {
                     this.getListOfPermission();
                 }, 1000);
@@ -85,18 +92,18 @@ export class MyApp {
             }
             else if (page) {
                 const alert = this.alertCtrl.create({
-                    title: 'Sluiten',
-                    message: 'Weet je zeker dat je wilt afsluiten ?',
+                    title: 'Exit App',
+                    message: 'Are you sure to want to exit the app ?',
                     cssClass: 'confirmExit',
                     buttons: [
                         {
-                            text: 'Annuleer',
+                            text: 'Cancel',
                             role: 'cancel',
                             handler: () => {
                             }
                         },
                         {
-                            text: 'Sluiten',
+                            text: 'Exit',
                             handler: () => {
                                 this.platform.exitApp(); //Exit from app
                             }
@@ -113,8 +120,8 @@ export class MyApp {
     globalSubscriber() {
         this.subscription = this.authProvider.authState.subscribe((state: AuthState) => {
             this.is_logged_in = state.is_logged_in;
-            this.menuCtrl.enable(this.is_logged_in);
-            this.setUserData();
+            // this.menuCtrl.enable(this.is_logged_in);
+            // this.setUserData();
             // this.rootPage = this.is_logged_in ? HomePage : LoginPage;
         }, (err) => {
             console.log('err', err)
@@ -135,6 +142,10 @@ export class MyApp {
                 console.log('page:redirect event catched.!', payload.data);
                 this.redirect(payload.data.page_name, payload.data.param, payload.data.is_root);
             }
+        });
+
+        this.networkProvider.networkState.subscribe(() => {
+            this.networkProvider.setConnection();
         });
     }
 
@@ -180,7 +191,7 @@ export class MyApp {
 
     logout() {
         // this.nav.setRoot('LoginPage');
-        this.menuCtrl.enable(false);
+        // this.menuCtrl.enable(false);
         this.authProvider.logout();
     }
 

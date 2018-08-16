@@ -8,12 +8,18 @@ import {ListPage} from '../pages/list/list';
 
 import {StatusBar} from '@ionic-native/status-bar';
 import {SplashScreen} from '@ionic-native/splash-screen';
-import {CommonService} from "./services/common-service";
 import {HttpClientModule} from "@angular/common/http";
 import {AndroidPermissions} from "@ionic-native/android-permissions";
-import {AuthService} from "./services/auth-service";
-import {EventsService} from "./services/events.service";
 import {TabsPage} from "../pages/tabs/tabs";
+import {SQLite} from "@ionic-native/sqlite";
+import {AuthService} from "../services/auth-service";
+import {EventsService} from "../services/events.service";
+import {CommonService} from "../services/common-service";
+import {MigrationService} from "../services/migration-service";
+import {SqliteService} from "../services/sqlite-service";
+import {NetworkProvider} from "../services/network.service";
+import {Network} from "@ionic-native/network";
+import {ViewsService} from "../services/views.service";
 
 @NgModule({
     declarations: [
@@ -38,7 +44,13 @@ import {TabsPage} from "../pages/tabs/tabs";
         StatusBar,
         SplashScreen,
         AndroidPermissions,
+        SQLite,
+        Network,
         AuthService,
+        SqliteService,
+        MigrationService,
+        ViewsService,
+        NetworkProvider,
         EventsService,
         CommonService,
         {provide: ErrorHandler, useClass: IonicErrorHandler}

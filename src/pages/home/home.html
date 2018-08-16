@@ -37,7 +37,7 @@
     </div>
 
     <div>
-        <ion-card>
+        <ion-card *ngFor="let view of views; let i = index">
             <!--this is kinda' cool, a picture above every card-->
             <!--img *ngIf="article.artworkURL" [src]="article.artworkURL"/-->
             <ion-card-content>
@@ -46,17 +46,17 @@
                 </div>
 
                 <div>
-                    <ion-card-title>Card Title</ion-card-title>
+                    <ion-card-title>{{ view.title }}</ion-card-title>
                     <ion-badge class="rightButton" color=danger>New</ion-badge>
-                    <div>Article Series</div>
+                    <div>{{ view.field_service }}</div>
                     <!--p>Article ID {{ article.id }}</p-->
-                    <p>Artical Author</p>
-                    <p>Artical Date</p>
+                    <p>{{ view.field_channel }}</p>
+                    <p>{{ view.field_date }}</p>
                     <!--p>Feed: {{article.feedID}}</p-->
                 </div>
-                <button ion-button icon-only clear float-right class="important">
-                    <ion-icon name="star"></ion-icon>
-                    <ion-icon name='star-outline'></ion-icon>
+                <button ion-button icon-only clear float-right class="important" (click)="view.favorite = !view.favorite">
+                    <ion-icon name="star" *ngIf="view.favorite"></ion-icon>
+                    <ion-icon name='star-outline' *ngIf="!view.favorite"></ion-icon>
                 </button>
             </ion-card-content>
 

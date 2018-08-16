@@ -1,7 +1,7 @@
 import {Injectable,} from '@angular/core';
 import {Events, LoadingController, ToastController} from 'ionic-angular';
 import {HttpClient, HttpHeaders,} from "@angular/common/http";
-import {Environment} from "../../environment/environment";
+import {Environment} from "../environment/environment";
 
 @Injectable()
 export class CommonService {
@@ -51,6 +51,26 @@ export class CommonService {
             this.loader.dismiss().catch(() => {
             });
             this.loader = undefined;
+        }
+    }
+
+    isOnlineMode() {
+        return this.getCurrentMode() == 'online';
+    }
+
+    getCurrentMode() {
+        let mode = window.localStorage.getItem('current_mode');
+        if (mode) {
+            if (mode == 'offline') {
+                return 'offline';
+                //activate online
+            } else if (mode == 'online') {
+                return 'online';
+                //activate offline
+            }
+        } else {
+            window.localStorage.setItem('current_mode', 'offline');
+            return 'offline';
         }
     }
 
