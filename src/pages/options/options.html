@@ -1,0 +1,19 @@
+<ion-header>
+
+  <ion-navbar>
+    <button clas="buttonLeft" ion-button icon-only clear (click)="cancel()">
+      <ion-icon name="close"></ion-icon>
+    </button>
+    <ion-title>Options</ion-title>
+  </ion-navbar>
+
+</ion-header>
+
+
+<ion-content padding>
+  <ion-list>
+    <ion-item (click)="dismiss('read')">Mark all as read</ion-item>
+    <ion-item (click)="dismiss('unread')">Mark all as unread</ion-item>
+  </ion-list>
+</ion-content>
+ 

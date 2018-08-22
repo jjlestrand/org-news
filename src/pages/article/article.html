@@ -1,0 +1,53 @@
+<ion-header>
+
+    <ion-navbar color="primary">
+        <!--include channel somewhere - maybe in the title? -->
+        <ion-title>{{article.title | decodeHtmlEntities}}</ion-title>
+        <!--<ion-buttons end>
+          <button ion-button icon-only end (click)="showOptionsPopover()">
+            <ion-icon color="primary" name="arrow-down"></ion-icon>
+          </button>
+        </ion-buttons>-->
+    </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+    <ion-grid class="tlw">
+        <ion-row>
+            <ion-col>
+                <h2>{{article.title | decodeHtmlEntities}}</h2>
+                <p class="byline">Preached {{ article.field_date }} by {{ article.title_1 }}.</p>
+            </ion-col>
+        </ion-row>
+
+        <ion-row>
+            <ion-col col-2>
+                <img class="articleImage" [src]="'assets/images/nature.jpg'"/><br>
+                <img *ngIf="article.artworkURL" class="articleImage" [src]="article.artworkURL"/><br>
+                <img *ngIf="article.authorPhoto" class="authorImage" [src]="article.authorPhoto"/>
+
+            </ion-col>
+            <ion-col>
+                <p class="series" *ngIf="article.field_study_series">From the series
+                    <i>{{article.field_study_series}} </i>.</p>
+                <!--<p *ngIf="article.series" class="series">From the series <i>{{article.series }}</i>.</p>-->
+                <p class="byline" id="articleBody">{{article.body}}</p>
+            </ion-col>
+        </ion-row>
+
+        <ion-row>
+            <ion-col>
+                <!--<div *ngIf="article.mediaURL && checkMediaType(article.mediaURL)=='Video'" class="articleMediaContainer">-->
+                <!--<video class="articleVideo" controls >-->
+                <!--&lt;!&ndash;source [src]="article.mediaURL" type="video/mp4" poster="{{article.artworkURL.src}}" /&ndash;&gt;-->
+                <!--<source [src]="article.mediaURL" type="video/mp4">-->
+                <!--</video>-->
+                <!--</div>-->
+
+                <!--<audio-player [(article)]="article"></audio-player>-->
+
+                <!--<div>Channel: {{ article.channel }}</div>-->
+                <!--<div>Article ID: {{ article.id }}</div>-->
+            </ion-col>
+        </ion-row>
+    </ion-grid>

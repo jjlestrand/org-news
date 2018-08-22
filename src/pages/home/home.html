@@ -9,35 +9,32 @@
 
 <ion-content class="content" padding>
     <!-- Pull to refresh -->
-    <ion-refresher>
-        <ion-refresher-content></ion-refresher-content>
+    <ion-refresher (ionRefresh)="getLatestViews($event)">
+        <ion-refresher-content pullingText="Pull to refresh"
+                               refreshingText="Refreshing..."></ion-refresher-content>
     </ion-refresher>
 
     <!-- option buttons -->
-    <ion-buttons start>
-        <button class="leftButton" ion-button icon-left>
-            <ion-icon name="search"></ion-icon>
-            Search
-        </button>
-        <button class="rightButton" ion-button icon-right>
-            Options
-            <ion-icon name="menu"></ion-icon>
-        </button>
-
-    </ion-buttons>
-
+    <button class="leftButton" ion-button icon-left (click)="filterMenuPopover($event)">
+        <ion-icon name="search"></ion-icon>
+        Search
+    </button>
+    <button class="rightButton" ion-button icon-right end (click)="optionsMenuPopover($event)">
+        Options
+        <ion-icon name="menu"></ion-icon>
+    </button>
     <!-- Article list -->
-    <div>
-        <ion-list>
-            <ion-item>ABC</ion-item>
-            <ion-item>ABC</ion-item>
-            <ion-item>ABC</ion-item>
-            <ion-item>ABC</ion-item>
-        </ion-list>
-    </div>
+    <!--<div>-->
+    <!--<ion-list>-->
+    <!--<ion-item>ABC</ion-item>-->
+    <!--<ion-item>ABC</ion-item>-->
+    <!--<ion-item>ABC</ion-item>-->
+    <!--<ion-item>ABC</ion-item>-->
+    <!--</ion-list>-->
+    <!--</div>-->
 
     <div>
-        <ion-card *ngFor="let view of views; let i = index">
+        <ion-card *ngFor="let view of views; let i = index" (click)="goToDetail($event, i)">
             <!--this is kinda' cool, a picture above every card-->
             <!--img *ngIf="article.artworkURL" [src]="article.artworkURL"/-->
             <ion-card-content>
@@ -46,36 +43,39 @@
                 </div>
 
                 <div>
-                    <ion-card-title>{{ view.title }}</ion-card-title>
-                    <ion-badge class="rightButton" color=danger>New</ion-badge>
+                    <ion-card-title>{{ view.title | decodeHtmlEntities }}</ion-card-title>
+                    <ion-badge class="rightButton" color=danger *ngIf="!view.readed">New</ion-badge>
                     <div>{{ view.field_service }}</div>
                     <!--p>Article ID {{ article.id }}</p-->
                     <p>{{ view.field_channel }}</p>
                     <p>{{ view.field_date }}</p>
                     <!--p>Feed: {{article.feedID}}</p-->
                 </div>
-                <button ion-button icon-only clear float-right class="important" (click)="view.favorite = !view.favorite">
+                <button ion-button icon-only clear float-right class="important favourite_btn"
+                        (click)="toggleFavourite(i)">
                     <ion-icon name="star" *ngIf="view.favorite"></ion-icon>
                     <ion-icon name='star-outline' *ngIf="!view.favorite"></ion-icon>
                 </button>
             </ion-card-content>
-
         </ion-card>
 
         <!-- infinite scroll -->
-        <ion-infinite-scroll [enabled]="true">
+        <ion-infinite-scroll (ionInfinite)="doInfinite($event)" threshold="20%"
+                             *ngIf="this.pagination.loadedAll == false">
             <ion-infinite-scroll-content
-                    loadingSpinner="bubbles"
                     loadingText="Loading more articles...">
             </ion-infinite-scroll-content>
         </ion-infinite-scroll>
     </div>
+
     <div>
 
         <!-- buttons to be removed after development -->
-        <button ion-button codlor="secondary" (click)="alert('notifications')">set local notification</button>
-        <button ion-button color="danger" (click)="alert('Delete message')">Delete Database</button>
+        <!--<button ion-button codlor="secondary" (click)="alert('notifications')">set local notification</button>-->
+        <!--<button ion-button color="danger" (click)="alert('Delete message')">Delete Database</button>-->
     </div>
+
 </ion-content>
+
 
 

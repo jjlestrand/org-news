@@ -4,6 +4,7 @@ import {HttpClient} from "@angular/common/http";
 import {SqliteService} from "./sqlite-service";
 import {Environment} from "../environment/environment";
 import {MigrationService} from "./migration-service";
+import {Observable} from "rxjs/Observable";
 
 export class view {
     nid: number;
@@ -19,11 +20,13 @@ export class view {
     title: String;
     title_1: String;
     favorite: boolean;
+    readed: boolean;
 }
 
 @Injectable()
 
 export class ViewsService {
+
     constructor(private com: CommonService,
                 private http: HttpClient,
                 private migrationService: MigrationService,
@@ -31,33 +34,33 @@ export class ViewsService {
 
     }
 
-    getViews() {
+    getViews(row_count, offset) {
         return new Promise((async (resolve, reject) => {
-            if (this.com.isOnlineMode()) {
-                this.getViewsOnline()
-                    .then((res) => {
-                        this.storeAllDataOffline(res);
-                    });
-            }
-
-            this.getViewsOffline()
-                .then((res: any) => {
-                    if (!res.length) {
-                        this.getViewsOnline()
-                            .then((res) => {
-                                resolve(res);
-                            })
-                            .catch((err) => {
-                                resolve([]);
-                            })
-                    } else {
-                        resolve(res);
+            try {
+                const onLineRes: any = await this.getViewsOnline();
+                // await this.removeAllExceptFavorited();
+                await this.storeAllDataOffline(onLineRes);
+                let query = 'select * from views LIMIT ' + row_count + ' OFFSET ' + offset;
+                let recordCount: any = await this.sqliteService.select('select count(*) from views');
+                recordCount = recordCount.results[0]['count(*)'] || false;
+                try {
+                    let records: any = await this.sqliteService.select(query);
+                    if (records) {
+                        resolve({recordEnd: (offset + row_count) > recordCount, data: records.results})
                     }
-                })
-                .catch((err) => {
-                    reject(err);
-                });
+                } catch (e) {
+                    reject(e);
+                }
+            } catch (e) {
+                reject(e);
+            }
         }))
+    }
+
+    updateView(nId, data) {
+        return new Promise((resolve, reject) => {
+
+        });
     }
 
     storeAllDataOffline(data) {
@@ -65,16 +68,10 @@ export class ViewsService {
             this.migrationService.viewsTable(data)
                 .then((res: any) => {
                     this.sqliteService.bulkInsertExecute(res.result)
-                        .then((res) => {
-                            resolve(res);
-                        })
-                        .catch((err) => {
-                            reject(err);
-                        })
+                        .then((res) => resolve(res))
+                        .catch((err) => reject(err))
                 })
-                .catch((err) => {
-                    reject(err);
-                });
+                .catch((err) => reject(err));
         }));
     }
 
@@ -90,16 +87,56 @@ export class ViewsService {
         });
     }
 
-    private getViewsOffline() {
-        return new Promise((resolve, reject) => {
-            let query = 'select * from views';
-            this.sqliteService.select(query)
-                .then((res: any) => {
-                    resolve(res.results);
-                })
-                .catch((err) => {
-                    reject(err);
-                })
+    removeAllExceptFavorited() {
+        let query = ['delete from views where favorite=?', [0]];
+        return this.sqliteService.bulkInsertExecute([query]);
+    }
+
+    getViewsOffline(row_count = 0, offset = 0) {
+        return new Promise(async (resolve, reject) => {
+            if (row_count) {
+                let query = 'select * from views limit ' + row_count + ' offset ' + offset;
+                let recordCount: any = await this.sqliteService.select('select count(*) from views');
+                recordCount = recordCount.results[0]['count(*)'] || false;
+                if (recordCount > offset) {
+                    this.sqliteService.select(query)
+                        .then((res: any) => {
+                            resolve({recordEnd: false, data: res.results})
+                        })
+                        .catch((err) => {
+                            reject(err);
+                        })
+                } else {
+                    resolve({recordEnd: true, data: []})
+                }
+            } else {
+                resolve([]);
+            }
         });
+    }
+
+    removeView(nId) {
+        let query = ['delete from views where nid=?', [nId]];
+        return this.sqliteService.bulkInsertExecute([query]);
+    }
+
+    toggleFavourite(nId) {
+        let query = ['update views set favorite = NOT favorite where nid=?', [nId]];
+        return this.sqliteService.bulkInsertExecute([query]);
+    }
+
+    toggleViewReaded(nId) {
+        let query = ['update views set readed = NOT readed where nid=?', [nId]];
+        return this.sqliteService.bulkInsertExecute([query]);
+    }
+
+    markAllAsRead() {
+        let query = ['update views set readed = 1', []];
+        return this.sqliteService.bulkInsertExecute([query]);
+    }
+
+    markAllAsUnread() {
+        let query = ['update views set readed = 0', []];
+        return this.sqliteService.bulkInsertExecute([query]);
     }
 }

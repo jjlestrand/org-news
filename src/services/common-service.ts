@@ -95,4 +95,19 @@ export class CommonService {
         };
         return httpOptions;
     }
+
+    parentHasClass(targetEvent, className) {
+        /* check if target parent has class or not */
+        let result = false;
+        let target = targetEvent.srcElement;
+        while (target.parentElement) {
+            target = target.parentElement;
+            if (target.classList && target.classList.contains(className)) {
+                result = true;
+                break;
+            }
+        }
+        return result;
+        // return target.parentNode.classList.contains(className);
+    };
 }

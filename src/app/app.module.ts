@@ -20,6 +20,7 @@ import {SqliteService} from "../services/sqlite-service";
 import {NetworkProvider} from "../services/network.service";
 import {Network} from "@ionic-native/network";
 import {ViewsService} from "../services/views.service";
+import {PipesModule} from "../pipes/pipes.module";
 
 @NgModule({
     declarations: [
@@ -31,6 +32,7 @@ import {ViewsService} from "../services/views.service";
     imports: [
         BrowserModule,
         IonicModule.forRoot(MyApp),
+        PipesModule,
         HttpClientModule
     ],
     bootstrap: [IonicApp],

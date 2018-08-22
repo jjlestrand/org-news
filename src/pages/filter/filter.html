@@ -1,0 +1,24 @@
+<ion-header>
+
+  <ion-navbar>
+    <button clas="buttonLeft" ion-button icon-only clear (click)="cancel()">
+      <ion-icon name="close"></ion-icon>
+    </button>
+    <ion-title>Filter & Search</ion-title>
+  </ion-navbar>
+
+</ion-header>
+
+
+<ion-content padding>
+  <ion-list>
+    <ion-item-divider color="secondary">Search</ion-item-divider>
+    <ion-item><search [articles]="articles"></search></ion-item>
+    <ion-item-divider color="secondary">Filter by</ion-item-divider>
+    <ion-item (click)="dismiss('filter','favorite',true)">Favorites</ion-item>
+    <ion-item (click)="dismiss('filter','read', false)">Unread</ion-item>
+    <ion-item (click)="dismiss('reset','reset', true)">All</ion-item>
+    <ion-item *ngFor="let channel of channels" (click)="dismiss('filter',channel)">{{channel}}</ion-item>
+  </ion-list>
+</ion-content>
+ 

@@ -15,7 +15,8 @@ export const viewsTableFields = [
     {name: 'field_study_series', type: 'TEXT', nullable: false, primaryKey: false},
     {name: 'title', type: 'TEXT', nullable: false, primaryKey: false},
     {name: 'title_1', type: 'TEXT', nullable: false, primaryKey: false},
-    {name: 'favorite', type: 'INTEGER', nullable: false, primaryKey: false}
+    {name: 'favorite', type: 'INTEGER', nullable: false, primaryKey: false},
+    {name: 'readed', type: 'INTEGER', nullable: false, primaryKey: false}
 ];
 
 @Injectable()
@@ -88,8 +89,8 @@ export class MigrationService {
                     columnsStringArr.map((field) => {
                         if (field == 'nid') {
                             columnsValueArr.push(record[field] ? Number(record[field]) : '');
-                        } else if (field == 'favorite') {
-                            columnsValueArr.push(record[field] == 'true');
+                        } else if (field == 'favorite' || field == 'readed') {
+                            columnsValueArr.push(record[field] == 'true' ? 1 : 0);
                         } else {
                             columnsValueArr.push(record[field] ? record[field] : '');
                         }
