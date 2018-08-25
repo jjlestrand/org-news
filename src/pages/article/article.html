@@ -1,5 +1,4 @@
 <ion-header>
-
     <ion-navbar color="primary">
         <!--include channel somewhere - maybe in the title? -->
         <ion-title>{{article.title | decodeHtmlEntities}}</ion-title>
@@ -29,12 +28,21 @@
             </ion-col>
             <ion-col>
                 <p class="series" *ngIf="article.field_study_series">From the series
-                    <i>{{article.field_study_series}} </i>.</p>
+                    <i>{{article.field_study_series | decodeHtmlEntities}} </i>.</p>
                 <!--<p *ngIf="article.series" class="series">From the series <i>{{article.series }}</i>.</p>-->
-                <p class="byline" id="articleBody">{{article.body}}</p>
+                <p class="byline" id="articleBody">{{article.body | decodeHtmlEntities}}</p>
             </ion-col>
         </ion-row>
-
+        <audio-player
+                [src]="domain + article.field_mp3"
+                [uuId]="article.nid"
+                [last_play_duration]="last_play_duration"
+                [metaData]="article"
+                (onPlay)="player.playing = true"
+                (onStop)="resetPlayDuration(); player.playing = false"
+                (onPause)="addPlayDuration(); player.playing = false"
+                (durationChange)="player.duration = $event">
+        </audio-player>
         <ion-row>
             <ion-col>
                 <!--<div *ngIf="article.mediaURL && checkMediaType(article.mediaURL)=='Video'" class="articleMediaContainer">-->

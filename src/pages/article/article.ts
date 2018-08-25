@@ -1,7 +1,8 @@
 import {Component} from '@angular/core';
 import {PopoverController, IonicPage, NavController, NavParams} from 'ionic-angular';
-import {isDefined} from 'ionic-angular/util/util';
-import {view} from "../../services/views.service";
+import {view, ViewsService} from "../../services/views.service";
+import {PlayerService} from "../../services/player.service";
+import {Environment} from "../../environment/environment";
 
 @IonicPage()
 @Component({
@@ -12,16 +13,23 @@ export class ArticlePage {
 
     //article: Article;
     article: view;
+    domain: string;
+    player = { duration: 0, playing: false };
+    playerData: any;
+    last_play_duration: any = 0;
 
     constructor(public navCtrl: NavController,
                 public navParams: NavParams,
+                public playerService: PlayerService,
+                public viewsService: ViewsService,
                 private popoverCtrl: PopoverController) {
         this.article = this.navParams.get('article') || {};
-        console.log(this.article);
+        this.domain = Environment.DOMAIN;
     }
 
     //move most of this to glue module
-    ionViewDidLoad() {
+    async ionViewWillLoad() {
+        this.last_play_duration = await this.viewsService.getLastPlayDuration(this.article.nid);
         //put up loading component? Loading can be very slow.
         //this.websync.getArticle(this.article.id, this.article.feedID)
 
@@ -61,5 +69,21 @@ export class ArticlePage {
         // popover.onDidDismiss(data => {
         //   //console.log("articlePage popover dismissed");
         // });
+    }
+
+    addPlayDuration() {
+        this.viewsService.setPlayDuration(this.article.nid, this.player.duration);
+    }
+
+    resetPlayDuration() {
+        this.player.duration = 0;
+        this.viewsService.setPlayDuration(this.article.nid, this.player.duration);
+    }
+
+    ionViewWillLeave() {
+            this.playerService.stop();
+        // if (this.player.playing) {
+        //     this.addPlayDuration();
+        // }
     }
 }

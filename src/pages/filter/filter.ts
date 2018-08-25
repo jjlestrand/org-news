@@ -1,5 +1,6 @@
-import {Component} from '@angular/core';
+import {Component, EventEmitter, Output} from '@angular/core';
 import {IonicPage, NavController, NavParams, ViewController} from 'ionic-angular';
+import {ViewsService} from "../../services/views.service";
 
 @IonicPage()
 @Component({
@@ -7,35 +8,39 @@ import {IonicPage, NavController, NavParams, ViewController} from 'ionic-angular
     templateUrl: 'filter.html',
 })
 export class FilterPage {
-    articles: any;
-    channels: any;
+    articles = [];
+    channels = [];
 
-    constructor(public navCtrl: NavController, public navParams: NavParams, public viewCtrl: ViewController) {
-        this.articles = navParams.data.articles;
-
+    constructor(public navCtrl: NavController,
+                public navParams: NavParams,
+                public viewsService: ViewsService,
+                public viewCtrl: ViewController) {
+        this.viewsService.getViewsOffline()
+            .then((res: any) => {
+                this.articles = res.data;
+                if (this.articles) {
+                    this.articles.forEach(article => {
+                        if (article.field_channel && this.channels.indexOf(article.field_channel) == -1) {
+                            this.channels.push(article.field_channel);
+                        }
+                    });
+                }
+            });
     }
 
     ionViewDidLoad() {
         //console.log('ionViewDidLoad FilterPage');
-        this.channels = new Set();
-        this.getChannels();
-    }
-
-    getChannels() {
-        if (this.articles) {
-            this.articles.forEach(article => {
-                if (article.channel) {
-                    this.channels.add(article.channel);
-                }
-            });
-        }
     }
 
     cancel() {
         this.viewCtrl.dismiss();
     }
 
-    dismiss(action, item, value) {
-        this.viewCtrl.dismiss({action: action, item: item, value: value});
+    dismiss(action, item) {
+        this.viewCtrl.dismiss({action: action, item: item});
+    }
+
+    viewSelected() {
+        this.viewCtrl.dismiss({});
     }
 } 

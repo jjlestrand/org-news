@@ -1,5 +1,5 @@
 import {Component, ViewChild} from '@angular/core';
-import {AlertController, Events, IonicApp, MenuController, Nav, Platform, Tabs} from 'ionic-angular';
+import {AlertController, Events, IonicApp, MenuController, Nav, Platform} from 'ionic-angular';
 import {StatusBar} from '@ionic-native/status-bar';
 import {SplashScreen} from '@ionic-native/splash-screen';
 import {HomePage} from '../pages/home/home';
@@ -22,12 +22,11 @@ interface GlobalEventPayload {
 })
 export class MyApp {
     @ViewChild(Nav) nav: Nav;
-
     subscription: any;
     is_logged_in: any;
     user: any;
     rootPage: any = TabsPage;
-    pages: Array<{ title: string, component: any }>
+    pages: Array<{ title: string, component: any }>;
 
     constructor(public platform: Platform,
                 public statusBar: StatusBar,
@@ -49,7 +48,6 @@ export class MyApp {
             {title: 'Home', component: HomePage},
             {title: 'List', component: ListPage}
         ];
-
     }
 
     initializeApp() {

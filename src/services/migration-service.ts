@@ -15,6 +15,7 @@ export const viewsTableFields = [
     {name: 'field_study_series', type: 'TEXT', nullable: false, primaryKey: false},
     {name: 'title', type: 'TEXT', nullable: false, primaryKey: false},
     {name: 'title_1', type: 'TEXT', nullable: false, primaryKey: false},
+    {name: 'last_play_duration', type: 'INTEGER', nullable: false, primaryKey: false},
     {name: 'favorite', type: 'INTEGER', nullable: false, primaryKey: false},
     {name: 'readed', type: 'INTEGER', nullable: false, primaryKey: false}
 ];
@@ -91,6 +92,8 @@ export class MigrationService {
                             columnsValueArr.push(record[field] ? Number(record[field]) : '');
                         } else if (field == 'favorite' || field == 'readed') {
                             columnsValueArr.push(record[field] == 'true' ? 1 : 0);
+                        } else if (field == 'last_play_duration') {
+                            columnsValueArr.push(record[field] ? record[field] : 0);
                         } else {
                             columnsValueArr.push(record[field] ? record[field] : '');
                         }

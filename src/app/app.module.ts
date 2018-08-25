@@ -21,6 +21,9 @@ import {NetworkProvider} from "../services/network.service";
 import {Network} from "@ionic-native/network";
 import {ViewsService} from "../services/views.service";
 import {PipesModule} from "../pipes/pipes.module";
+import {PlayerService} from "../services/player.service";
+import {Media} from "@ionic-native/media";
+import {MusicControls} from "@ionic-native/music-controls";
 
 @NgModule({
     declarations: [
@@ -55,6 +58,8 @@ import {PipesModule} from "../pipes/pipes.module";
         NetworkProvider,
         EventsService,
         CommonService,
+        PlayerService,
+        MusicControls, Media,
         {provide: ErrorHandler, useClass: IonicErrorHandler}
     ]
 })

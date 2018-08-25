@@ -39,7 +39,10 @@
             <!--img *ngIf="article.artworkURL" [src]="article.artworkURL"/-->
             <ion-card-content>
                 <div class="thumbContainer">
-                    <img class="thumbnail" [src]="'assets/images/nature.jpg'"/>
+                    <img class="thumbnail" *ngIf="!view.field_photo"
+                         [src]="'assets/images/avatar.png'"/>
+                    <img class="thumbnail" *ngIf="view.field_photo"
+                         [src]="domain + view.field_photo"/>
                 </div>
 
                 <div>

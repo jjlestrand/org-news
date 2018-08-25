@@ -1,0 +1,11 @@
+<ion-searchbar placeholder='Search by Title' (ionInput)="searchTitles($event)"></ion-searchbar>
+
+<ion-list>
+  <ion-item *ngFor="let result of searchResults" (click)="viewArticle($event, result)">
+    <label>{{ result.title }}</label>
+    <span *ngIf="result.series">from the series {{ result.series }}</span>
+    <span *ngIf="result.date">({{result.date}})</span>
+
+  </ion-item>
+</ion-list>
+

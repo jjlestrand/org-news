@@ -5,13 +5,14 @@ import {CommonService} from "../../services/common-service";
 import {DomSanitizer} from "@angular/platform-browser";
 import {EventsService} from "../../services/events.service";
 import {FilterPage} from "../filter/filter";
+import {Environment} from "../../environment/environment";
 
 @Component({
     selector: 'page-home',
     templateUrl: 'home.html'
 })
-export class HomePage {
 
+export class HomePage {
     views: Array<view> = [];
     pagination = {
         totalScrollPages: 0,
@@ -19,6 +20,8 @@ export class HomePage {
         offset: 0,
         loadedAll: false
     };
+    filterType = 'All';
+    domain: String;
 
     constructor(public navCtrl: NavController,
                 private com: CommonService,
@@ -26,7 +29,7 @@ export class HomePage {
                 private eventsService: EventsService,
                 private popoverCtrl: PopoverController,
                 private viewsProvider: ViewsService) {
-
+        this.domain = Environment.DOMAIN;
     }
 
     ionViewWillLoad() {
@@ -38,22 +41,24 @@ export class HomePage {
         this.views = [];
         this.viewsProvider.getViews(this.pagination.row_count, this.pagination.offset)
             .then((res: any) => {
+                console.log('res', res);
                 this.pagination.loadedAll = res.recordEnd;
                 this.views = [...this.views, ...res.data];
                 this.pagination.offset += res.data.length;
                 if (refresher) refresher.complete();
             }).catch((err) => {
+            alert('err => ' + JSON.stringify(err));
             if (refresher) refresher.complete();
         })
     }
 
-    getViewsOffline() {
+    getViewsOffline(reset = false) {
         return new Promise((resolve => {
             this.viewsProvider.getViewsOffline(this.pagination.row_count, this.pagination.offset)
                 .then((res: any) => {
-                    if (res.recordEnd) {
-                        this.pagination.loadedAll = true;
-                    } else {
+                    this.views = reset ? [] : this.views;
+                    this.pagination.loadedAll = res.recordEnd;
+                    if (!this.pagination.loadedAll) {
                         this.views = [...this.views, ...res.data];
                         this.pagination.offset += res.data.length;
                     }
@@ -80,7 +85,7 @@ export class HomePage {
             event.stopPropagation();
         } else {
             this.views[index].readed = true;
-            this.viewsProvider.toggleViewReaded(this.views[index].nid);
+            this.viewsProvider.setViewReaded(this.views[index].nid);
             this.eventsService.sendPageRedirectEvent('ArticlePage', {article: this.views[index]});
         }
     }
@@ -104,19 +109,54 @@ export class HomePage {
     }
 
     filterMenuPopover(myEvent) {
-        let popover = this.popoverCtrl.create('FilterPage', {articles: this.views}, {cssClass: 'filterMenu'});
+
+        let popover = this.popoverCtrl.create('FilterPage', {articles: this.views});
         popover.present({
             ev: myEvent
         });
 
         popover.onDidDismiss(data => {
-            if (data && data.action == 'reset') {
-                // this.refreshPage();
-            }
-            if (data && data.action == 'filter') {
-                // this.filterArticles(data.item, data.value);
+            if (data && data.action && data.item) {
+                this.getViewsFiltered(data.action, data.item);
             }
         });
+    }
+
+    getViewsFiltered(action, item) {
+        if (action == 'reset') {
+            this.pagination.offset = 0;
+            this.getViewsOffline(true);
+        } else if (action == 'filter' && item == 'favorite') {
+            this.viewsProvider.getAllFavorited()
+                .then((res: any) => {
+                    if (res.results && res.results.length > 0) {
+                        this.views = res.results;
+                    } else {
+                        this.com.toastMessage('No any records found with these filter');
+                    }
+                })
+                .catch((err) => this.com.toastMessage('Error Filter'));
+        } else if (action == 'filter' && item == 'unread') {
+            this.viewsProvider.getAllUnReaded()
+                .then((res: any) => {
+                    if (res.results && res.results.length > 0) {
+                        this.views = res.results;
+                    } else {
+                        this.com.toastMessage('No any records found with these filter');
+                    }
+                })
+                .catch((err) => this.com.toastMessage('Error Filter'));
+        } else if (action == 'channel') {
+            this.viewsProvider.getChannelWise(item)
+                .then((res: any) => {
+                    if (res.results && res.results.length > 0) {
+                        this.views = res.results;
+                    } else {
+                        this.com.toastMessage('No any records found with these filter');
+                    }
+                })
+                .catch((err) => this.com.toastMessage('Error Filter'));
+        }
     }
 
     readAll() {
@@ -124,13 +164,7 @@ export class HomePage {
             view.readed = true;
             return view;
         });
-        this.viewsProvider.markAllAsRead()
-            .then((res) => {
-                console.log('res', res);
-            })
-            .catch((err) => {
-                console.log('err', err);
-            });
+        this.viewsProvider.markAllAsRead();
     }
 
     unreadAll() {
@@ -138,12 +172,6 @@ export class HomePage {
             view.readed = false;
             return view;
         });
-        this.viewsProvider.markAllAsUnread()
-            .then((res) => {
-                console.log('res', res);
-            })
-            .catch((err) => {
-                console.log('err', err);
-            });
+        this.viewsProvider.markAllAsUnread();
     }
 }

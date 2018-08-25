@@ -4,21 +4,21 @@ import {HttpClient} from "@angular/common/http";
 import {SqliteService} from "./sqlite-service";
 import {Environment} from "../environment/environment";
 import {MigrationService} from "./migration-service";
-import {Observable} from "rxjs/Observable";
 
 export class view {
     nid: number;
-    field_artwork: String;
-    field_artwork_1: String;
-    field_channel: String;
-    field_date: String;
-    field_image: String;
-    field_mp3: String;
-    field_photo: String;
-    field_service: String;
-    field_study_series: String;
-    title: String;
-    title_1: String;
+    field_artwork: string;
+    field_artwork_1: string;
+    field_channel: string;
+    field_date: string;
+    field_image: string;
+    field_mp3: string;
+    field_photo: string;
+    field_service: string;
+    field_study_series: string;
+    title: string;
+    title_1: string;
+    last_play_duration: number;
     favorite: boolean;
     readed: boolean;
 }
@@ -36,20 +36,21 @@ export class ViewsService {
 
     getViews(row_count, offset) {
         return new Promise((async (resolve, reject) => {
+            let onLineRes: any;
             try {
-                const onLineRes: any = await this.getViewsOnline();
-                // await this.removeAllExceptFavorited();
-                await this.storeAllDataOffline(onLineRes);
-                let query = 'select * from views LIMIT ' + row_count + ' OFFSET ' + offset;
-                let recordCount: any = await this.sqliteService.select('select count(*) from views');
-                recordCount = recordCount.results[0]['count(*)'] || false;
-                try {
-                    let records: any = await this.sqliteService.select(query);
-                    if (records) {
-                        resolve({recordEnd: (offset + row_count) > recordCount, data: records.results})
-                    }
-                } catch (e) {
-                    reject(e);
+                onLineRes = await this.getViewsOnline();
+            } catch (e) {
+                reject(e);
+            }
+            // await this.removeAllExceptFavorited();
+            let storeRes = await this.storeAllDataOffline(onLineRes);
+            let query = 'select * from views LIMIT ' + row_count + ' OFFSET ' + offset;
+            let recordCount: any = await this.sqliteService.select('select count(*) from views');
+            recordCount = recordCount.results[0]['count(*)'] || false;
+            try {
+                let records: any = await this.sqliteService.select(query);
+                if (records) {
+                    resolve({recordEnd: (offset + row_count) > recordCount, data: records.results})
                 }
             } catch (e) {
                 reject(e);
@@ -68,10 +69,10 @@ export class ViewsService {
             this.migrationService.viewsTable(data)
                 .then((res: any) => {
                     this.sqliteService.bulkInsertExecute(res.result)
-                        .then((res) => resolve(res))
-                        .catch((err) => reject(err))
+                        .then((res) => resolve({status: true, data: res}))
+                        .catch((err) => resolve({status: false, err: err}))
                 })
-                .catch((err) => reject(err));
+                .catch((err) => resolve({status: false, err: err}));
         }));
     }
 
@@ -94,23 +95,22 @@ export class ViewsService {
 
     getViewsOffline(row_count = 0, offset = 0) {
         return new Promise(async (resolve, reject) => {
-            if (row_count) {
-                let query = 'select * from views limit ' + row_count + ' offset ' + offset;
-                let recordCount: any = await this.sqliteService.select('select count(*) from views');
-                recordCount = recordCount.results[0]['count(*)'] || false;
-                if (recordCount > offset) {
-                    this.sqliteService.select(query)
-                        .then((res: any) => {
-                            resolve({recordEnd: false, data: res.results})
-                        })
-                        .catch((err) => {
-                            reject(err);
-                        })
-                } else {
-                    resolve({recordEnd: true, data: []})
-                }
+            let query =
+                row_count ?
+                    'select * from views limit ' + row_count + ' offset ' + offset :
+                    'select * from views';
+            let recordCount: any = await this.sqliteService.select('select count(*) from views');
+            recordCount = recordCount.results[0]['count(*)'] || false;
+            if (recordCount > offset) {
+                this.sqliteService.select(query)
+                    .then((res: any) => {
+                        resolve({recordEnd: false, data: res.results})
+                    })
+                    .catch((err) => {
+                        reject(err);
+                    })
             } else {
-                resolve([]);
+                resolve({recordEnd: true, data: []})
             }
         });
     }
@@ -125,8 +125,8 @@ export class ViewsService {
         return this.sqliteService.bulkInsertExecute([query]);
     }
 
-    toggleViewReaded(nId) {
-        let query = ['update views set readed = NOT readed where nid=?', [nId]];
+    setViewReaded(nId) {
+        let query = ['update views set readed = 1 where nid=?', [nId]];
         return this.sqliteService.bulkInsertExecute([query]);
     }
 
@@ -138,5 +138,34 @@ export class ViewsService {
     markAllAsUnread() {
         let query = ['update views set readed = 0', []];
         return this.sqliteService.bulkInsertExecute([query]);
+    }
+
+    getAllFavorited() {
+        let query = 'select * from views where favorite = 1';
+        return this.sqliteService.select(query);
+    }
+
+    getAllUnReaded() {
+        let query = 'select * from views where readed = 0';
+        return this.sqliteService.select(query);
+    }
+
+    getChannelWise(channel_name) {
+        let query = 'select * from views where field_channel = ' + channel_name;
+        return this.sqliteService.select(query);
+    }
+
+    setPlayDuration(nid, playerDuration) {
+        let query = ['update views set last_play_duration=? where nid=?', [parseInt(playerDuration), nid]];
+        return this.sqliteService.bulkInsertExecute([query]);
+    }
+
+    getLastPlayDuration(nid) {
+        return new Promise((resolve => {
+            let query = 'select last_play_duration from views where nid = ' + nid;
+            this.sqliteService.select(query)
+                .then((res: any) => resolve(res.results[0].last_play_duration || 0))
+                .catch((err) => resolve(0));
+        }))
     }
 }

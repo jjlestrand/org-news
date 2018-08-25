@@ -1,0 +1,51 @@
+<!-- Generated template for the AudioPlayerComponent component -->
+<div id="audioPlayer">
+    <div id="audioPlayerNav">
+        <button ion-button medium icon-only (click)="rewind()" [disabled]="!durationModel">
+            <ion-icon name="rewind"></ion-icon>
+        </button>
+        <button name="playButton" [(disabled)]="!src" ion-button large icon-only (click)="togglePlay()"
+                *ngIf="player.status != 1">
+            <ion-icon [name]="'play'" *ngIf="!player.status || player.status != 2 "></ion-icon>
+            <ion-icon [name]="'pause'" *ngIf="player.status == 2"></ion-icon>
+        </button>
+        <button ion-button large icon-only style="padding: 15px" *ngIf="player.status == 1">
+            <ion-spinner></ion-spinner>
+        </button>
+
+        <button ion-button medium icon-only (click)="fastForward()" [disabled]="!durationModel">
+            <ion-icon name="fastforward"></ion-icon>
+        </button>
+
+        <!-- use cordova-plugin-cordova-transfer -->
+        <!--button ion-button medium icon-only clear><ion-icon name="download"></ion-icon></button-->
+        <button ion-button small icon-only clear (click)="volumeVisible = !volumeVisible">
+            <ion-icon name="volume-up"></ion-icon>
+        </button>
+
+        <!-- hidden div -->
+        <div [ngClass]="volumeVisible ? 'shewn' : 'unshewn'">
+      <span>
+        <ion-range [(ngModel)]="volume" min=0 max=10 step=1 name="volume-slider">
+          <ion-icon range-left small name="volume-down"></ion-icon>
+          <ion-icon range-right small name="volume-up"
+                    [color]="volume > 8 ? 'danger' : 'primary'"></ion-icon>
+        </ion-range>
+      </span>
+        </div>
+    </div>
+
+    <div id="audioPlayerProgress">
+        <ion-item>
+            <ion-range [min]="'0'" [max]="player.duration"
+                       [(ngModel)]="durationModel" [disabled]="!durationModel"
+                        (ionBlur)="seek()" >
+                <ion-label range-left small>{{ convertSeconds(player.current_duration)
+                    }}</ion-label>
+                <ion-label range-right>{{ convertSeconds(player.duration) }}</ion-label>
+            </ion-range>
+        </ion-item>
+
+    </div>
+    <!--<audio #audioplayer src={{article.mediaURL}} [volume]="volume/10"></audio>-->
+</div>
