@@ -8,6 +8,7 @@ export const _USER_LOGIN_EVENT = 'user:login';
 export const _INVALID_AUTHENTICATION_EVENT = 'invalid:authentication';
 export const _TOKEN_EXPIRED_EVENT = 'token:expired';
 export const _PAGE_RIDRECT_EVENT = 'page:redirect';
+export const _TAB_RIDRECT_EVENT = 'tab:redirect';
 
 @Injectable()
 export class EventsService {
@@ -44,6 +45,17 @@ export class EventsService {
                 page_name: pageName,
                 param: param ? param : {},
                 is_root: isRoot ? isRoot : false,
+            }
+        });
+    }
+
+    sendTabRedirectEvent(pageName, param) {
+        console.log("Publishing tab redirect event");
+        this.events.publish(_GLOBAL_EVENT, {
+            type: _TAB_RIDRECT_EVENT,
+            data: {
+                page_name: pageName,
+                param: param ? param : {}
             }
         });
     }

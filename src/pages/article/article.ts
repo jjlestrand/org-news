@@ -14,7 +14,7 @@ export class ArticlePage {
     //article: Article;
     article: view;
     domain: string;
-    player = { duration: 0, playing: false };
+    player = {duration: 0, playing: false};
     playerData: any;
     last_play_duration: any = 0;
 
@@ -80,10 +80,14 @@ export class ArticlePage {
         this.viewsService.setPlayDuration(this.article.nid, this.player.duration);
     }
 
+    trackPlayComplete() {
+
+    }
+
     ionViewWillLeave() {
-            this.playerService.stop();
-        // if (this.player.playing) {
-        //     this.addPlayDuration();
-        // }
+        if (this.player.playing) {
+            this.addPlayDuration();
+        }
+        this.playerService.stop();
     }
 }

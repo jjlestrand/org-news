@@ -39,7 +39,8 @@
                 [last_play_duration]="last_play_duration"
                 [metaData]="article"
                 (onPlay)="player.playing = true"
-                (onStop)="resetPlayDuration(); player.playing = false"
+                (onStop)="addPlayDuration(); this.player.duration = 0; player.playing = false"
+                (onComplete)="resetPlayDuration(); player.playing = false"
                 (onPause)="addPlayDuration(); player.playing = false"
                 (durationChange)="player.duration = $event">
         </audio-player>

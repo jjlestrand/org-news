@@ -28,6 +28,7 @@ export class AudioPlayerComponent {
     @Output() onPlay = new EventEmitter();
     @Output() onPause = new EventEmitter();
     @Output() onStop = new EventEmitter();
+    @Output() onComplete = new EventEmitter();
     @Output() durationChange = new EventEmitter();
     private player: playerAttrs = new playerAttrs();
     onStatusUpdate: any;
@@ -48,9 +49,6 @@ export class AudioPlayerComponent {
 
     initPlayer() {
         let playerData = this.playerService.getCurrentPlayerData();
-        if (playerData && (playerData.trackId == this.uuId)) {
-
-        }
     }
 
     subscriber() {
@@ -78,9 +76,14 @@ export class AudioPlayerComponent {
                         }
                         else if (res.status == 3) this.onPause.emit();
                         else if (res.status == 4) {
-                            this.onStop.emit();
+                            if (parseInt(this.player.current_duration.toString()) == parseInt(this.playerService.getTrackDuration().toString())) {
+                                this.onComplete.emit();
+                            } else {
+                                this.onStop.emit();
+                            }
                             this.durationModel = 0;
                             this.player.current_duration = 0;
+                            this.unsubscribe();
                         }
                     });
                 }

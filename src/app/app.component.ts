@@ -1,5 +1,5 @@
 import {Component, ViewChild} from '@angular/core';
-import {AlertController, Events, IonicApp, MenuController, Nav, Platform} from 'ionic-angular';
+import {AlertController, App, Events, IonicApp, MenuController, Nav, Platform} from 'ionic-angular';
 import {StatusBar} from '@ionic-native/status-bar';
 import {SplashScreen} from '@ionic-native/splash-screen';
 import {HomePage} from '../pages/home/home';
@@ -11,8 +11,9 @@ import {AuthService, AuthState} from "../services/auth-service";
 import {HttpClient} from "@angular/common/http";
 import {MigrationService} from "../services/migration-service";
 import {NetworkProvider} from "../services/network.service";
+import {EventsService} from "../services/events.service";
 
-interface GlobalEventPayload {
+export interface GlobalEventPayload {
     type: string; // redirect, authorization,
     data: any;
 }
@@ -30,11 +31,13 @@ export class MyApp {
 
     constructor(public platform: Platform,
                 public statusBar: StatusBar,
+                public app: App,
                 public splashScreen: SplashScreen,
                 public menuCtrl: MenuController,
                 public alertCtrl: AlertController,
                 public migrationService: MigrationService,
                 public event: Events,
+                public eventsService: EventsService,
                 public commonService: CommonService,
                 public androidPermissions: AndroidPermissions,
                 public networkProvider: NetworkProvider,
@@ -45,7 +48,7 @@ export class MyApp {
 
         // used for an example of ngFor and navigation
         this.pages = [
-            {title: 'Home', component: HomePage},
+            {title: 'Home', component: TabsPage},
             {title: 'List', component: ListPage}
         ];
     }
@@ -195,6 +198,16 @@ export class MyApp {
 
     redirect(name, params = {}, isRoot = false) {
         console.log('redirect to name', name, params, isRoot);
+/*
+        const isTabPage = this.pages.filter((page) => page.component == name);
+        if (isTabPage.length > 0) {
+            let nav = this.app.getRootNav();
+            this.nav.setRoot(name);
+            // this.nav.setRoot(TabsPage, { component: '' })
+            // this.eventsService.sendTabRedirectEvent(name, params);
+            return;
+        }*/
+
         if (isRoot) {
             this.nav.setRoot(name, params);
         } else {

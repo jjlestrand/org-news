@@ -83,6 +83,11 @@ export class PlayerService {
                         }, 100);
                     }
                     if (status == 4) {
+
+                        if (this.musicPlayer.currentDuration == this.musicPlayer.trackDuration) {
+
+                        }
+
                         this.musicControls.destroy();
                         clearInterval(playerDurationInterval);
                         this.stop();
