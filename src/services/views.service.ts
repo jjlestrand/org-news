@@ -42,7 +42,7 @@ export class ViewsService {
             } catch (e) {
                 reject(e);
             }
-            await this.removeAllExceptFavorited();
+            // await this.removeAllExceptFavorited();
             let storeRes = await this.storeAllDataOffline(onLineRes);
             let query = 'select * from views LIMIT ' + row_count + ' OFFSET ' + offset;
             let recordCount: any = await this.sqliteService.select('select count(*) from views');

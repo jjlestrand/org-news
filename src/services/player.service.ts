@@ -160,9 +160,11 @@ export class PlayerService {
 
     private resetPlayer() {
         // this.musicPlayer = new MusicPlayer();
-        this.musicPlayer.playerStatus = 0;
-        this.musicPlayer.isPlaying = false;
-        this.musicPlayer.currentDuration = 0;
+        if (this.musicPlayer) {
+            this.musicPlayer.playerStatus = 0;
+            this.musicPlayer.isPlaying = false;
+            this.musicPlayer.currentDuration = 0;
+        }
         this.destroyMusicControl();
     }
 
