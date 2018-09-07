@@ -24,6 +24,7 @@ import {PipesModule} from "../pipes/pipes.module";
 import {PlayerService} from "../services/player.service";
 import {Media} from "@ionic-native/media";
 import {MusicControls} from "@ionic-native/music-controls";
+import {AppConfigService} from "../services/appConfig.service";
 
 @NgModule({
     declarations: [
@@ -46,6 +47,7 @@ import {MusicControls} from "@ionic-native/music-controls";
         TabsPage
     ],
     providers: [
+        AppConfigService,
         StatusBar,
         SplashScreen,
         AndroidPermissions,

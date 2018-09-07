@@ -31,6 +31,7 @@ export class SqliteService {
                             resolve({result: result, status: true, message: 'query executed'});
                         })
                         .catch((err) => {
+                            alert('err sqlbatch => ' + JSON.stringify(err));
                             reject({result: [], status: false, err: err, message: 'query execution fail!'})
                         });
                 }).catch(e => {
