@@ -1,7 +1,9 @@
-const DOMAIN:String = 'ruth.savagedns.com';
+import {API_CHOOSER, APIs} from "../config/setting";
+
+const DOMAIN:String = APIs[API_CHOOSER].domain;
+const API: String = APIs[API_CHOOSER].api;
 export const Environment = {
-    FRONTEND_DOMAIN: 'www.acncdapp.com',
-    API_URL: `http://${DOMAIN}/lbc5/rest/`,
+    API_URL: `http://${API}`,
     API_VERSION: `v1.0.0`,
     DOMAIN: `http://${DOMAIN}/`
 };

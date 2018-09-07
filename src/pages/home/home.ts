@@ -1,8 +1,8 @@
 import {Component} from '@angular/core';
-import {NavController, PopoverController} from 'ionic-angular';
+import {NavController, Platform, PopoverController} from 'ionic-angular';
 import {view, ViewsService} from "../../services/views.service";
 import {CommonService} from "../../services/common-service";
-import {DomSanitizer} from "@angular/platform-browser";
+import {DomSanitizer, platformBrowser} from "@angular/platform-browser";
 import {EventsService} from "../../services/events.service";
 import {FilterPage} from "../filter/filter";
 import {Environment} from "../../environment/environment";
@@ -26,6 +26,7 @@ export class HomePage {
     constructor(public navCtrl: NavController,
                 private com: CommonService,
                 private sanitize: DomSanitizer,
+                private platform: Platform,
                 private eventsService: EventsService,
                 private popoverCtrl: PopoverController,
                 private viewsProvider: ViewsService) {
@@ -33,21 +34,24 @@ export class HomePage {
     }
 
     ionViewWillLoad() {
-        this.getLatestViews();
+        this.platform.ready()
+            .then((res) => {
+                this.getLatestViews();
+            });
     }
 
     getLatestViews(refresher?) {
         this.pagination.offset = 0;
-        this.views = [];
         this.viewsProvider.getViews(this.pagination.row_count, this.pagination.offset)
             .then((res: any) => {
                 console.log('res', res);
+                this.views = [];
                 this.pagination.loadedAll = res.recordEnd;
                 this.views = [...this.views, ...res.data];
                 this.pagination.offset += res.data.length;
                 if (refresher) refresher.complete();
             }).catch((err) => {
-            alert('err => ' + JSON.stringify(err));
+                this.com.toastMessage('Error Refreshing');
             if (refresher) refresher.complete();
         })
     }

@@ -1,6 +1,7 @@
 import {Injectable} from '@angular/core';
 import 'rxjs/add/operator/map';
 import {SqliteService} from "./sqlite-service";
+import {API_CHOOSER, APIs} from "../config/setting";
 
 export const viewsTableFields = [
     {name: 'nid', type: 'INTEGER', nullable: false, primaryKey: true},
@@ -23,7 +24,11 @@ export const viewsTableFields = [
 @Injectable()
 export class MigrationService {
 
+    public viewsTableFields: Array<any> = [];
+    api_fields: any;
+
     constructor(private sqliteService: SqliteService) {
+        this.api_fields = APIs[API_CHOOSER].dbFields;
     }
 
     tables() {
@@ -31,6 +36,10 @@ export class MigrationService {
             'views': this.viewsTable,
             // 'clients' : this.clientsTable,
         }
+    }
+
+    getViewTableFields() {
+        return this.viewsTableFields;
     }
 
     run() {
@@ -61,7 +70,6 @@ export class MigrationService {
     viewsTable(records = null) {
         return new Promise((resolve, reject) => {
             let $batchQuery = [];
-
             /* making create table query */
             let CREATE_TABLE_QUERY: string = 'CREATE TABLE IF NOT EXISTS views ( ';
             viewsTableFields.map((field) => {
@@ -80,8 +88,8 @@ export class MigrationService {
             });
             let columnsString = columnsStringArr.toString();
             $batchQuery.push([CREATE_TABLE_QUERY, []]);
-
             /* if record, inserting */
+
             if (records) {
                 let columnsValueArr = [];
                 let string = [];
@@ -89,13 +97,13 @@ export class MigrationService {
                 records.map((record) => {
                     columnsStringArr.map((field) => {
                         if (field == 'nid') {
-                            columnsValueArr.push(record[field] ? Number(record[field]) : '');
+                            columnsValueArr.push(record[this.api_fields[field]] ? Number(record[this.api_fields[field]]) : '');
                         } else if (field == 'favorite' || field == 'readed') {
-                            columnsValueArr.push(record[field] == 'true' ? 1 : 0);
+                            columnsValueArr.push(record[this.api_fields[field]] == 'true' ? 1 : 0);
                         } else if (field == 'last_play_duration') {
-                            columnsValueArr.push(record[field] ? record[field] : 0);
+                            columnsValueArr.push(record[this.api_fields[field]] ? record[this.api_fields[field]] : 0);
                         } else {
-                            columnsValueArr.push(record[field] ? record[field] : '');
+                            columnsValueArr.push(record[this.api_fields[field]] ? record[this.api_fields[field]] : '');
                         }
                         string.push('?');
                     });
