@@ -4,6 +4,8 @@ import {HttpClient} from "@angular/common/http";
 import {SqliteService} from "./sqlite-service";
 import {Environment} from "../environment/environment";
 import {MigrationService, viewsTableFields} from "./migration-service";
+import {NetworkProvider} from "./network.service";
+import {API_CHOOSER, APIs} from "../config/setting";
 
 export class view {
     nid: number;
@@ -27,30 +29,36 @@ export class view {
 
 export class ViewsService {
 
+    api_fields: any;
+
     constructor(private com: CommonService,
                 private http: HttpClient,
                 private migrationService: MigrationService,
+                private networkProvider: NetworkProvider,
                 private sqliteService: SqliteService) {
-
+        this.api_fields = APIs[API_CHOOSER].dbFields;
     }
 
     getViews(row_count, offset) {
         return new Promise((async (resolve, reject) => {
-            let onLineRes: any;
-            try {
-                onLineRes = await this.getViewsOnline();
-            } catch (e) {
-                reject(e);
-            }
 
-            if (onLineRes) { // removes and stores new if onlineData get
+            if (this.networkProvider.isOnlineMode()) {
+                let onLineRes: any;
                 try {
-                    await this.removeAllExceptReadAndFavorited();
-                    let storeRes = await this.storeAllDataOfflineUpdateExisted(onLineRes);
+                    onLineRes = await this.getViewsOnline();
                 } catch (e) {
+                    reject(e);
+                }
+
+                if (onLineRes) { // removes and stores new if onlineData get
+                    try {
+                        await this.removeAllExceptReadAndFavorited();
+                        let storeRes = await this.storeAllDataOfflineUpdateExisted(onLineRes);
+                    } catch (e) {
+
+                    }
                 }
             }
-
             let query = 'select * from views LIMIT ' + row_count + ' OFFSET ' + offset;
             let recordCount: any = await this.sqliteService.select('select count(*) from views');
             recordCount = recordCount.results[0]['count(*)'] || false;
@@ -95,13 +103,16 @@ export class ViewsService {
                         .catch((err) => resolve({status: false, err: err}))
 
                 } else if (ids && ids.length) {
-                    let offlineData = data.filter((record) => ids.indexOf(parseInt(record.nid)) != -1);
-                    let onlineData = data.filter((record) => ids.indexOf(parseInt(record.nid)) == -1);
+                    let offlineData = data.filter((record) => ids.indexOf(parseInt(record[this.api_fields.nid])) != -1);
+                    let onlineData = data.filter((record) => ids.indexOf(parseInt(record[this.api_fields.nid])) == -1);
                     insertQuery = await this.migrationService.viewsTable(onlineData);
                     batchQuery = insertQuery.result;
                     // update existed
-                    let updateQuery: any = await this.updateTheExisted(offlineData);
-                    batchQuery = [...batchQuery, ...updateQuery];
+                    if (offlineData.length) {
+                        let updateQuery: any = await this.updateTheExisted(offlineData);
+                        batchQuery = [...batchQuery, ...updateQuery];
+                    }
+
                     this.sqliteService.bulkInsertExecute(batchQuery)
                         .then((res) => resolve({status: true, data: res}))
                         .catch((err) => resolve({status: false, err: err}))
@@ -156,9 +167,8 @@ export class ViewsService {
                 UPDATE_QUERY += ' where nid=?';
                 params.push(rec.nid);
                 query.push([UPDATE_QUERY, params]);
-            })
+            });
             console.log('query', query);
-
             resolve(query);
 
             // return this.sqliteService.bulkInsertExecute(query);

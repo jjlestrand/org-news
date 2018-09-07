@@ -89,4 +89,8 @@ export class NetworkProvider {
         }
     }
 
+    isOnlineMode() {
+        return localStorage.getItem('current_mode') == 'online';
+    }
+
 }

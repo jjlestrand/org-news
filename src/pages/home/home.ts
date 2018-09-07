@@ -42,15 +42,16 @@ export class HomePage {
 
     getLatestViews(refresher?) {
         this.pagination.offset = 0;
-        this.views = [];
         this.viewsProvider.getViews(this.pagination.row_count, this.pagination.offset)
             .then((res: any) => {
                 console.log('res', res);
+                this.views = [];
                 this.pagination.loadedAll = res.recordEnd;
                 this.views = [...this.views, ...res.data];
                 this.pagination.offset += res.data.length;
                 if (refresher) refresher.complete();
             }).catch((err) => {
+                this.com.toastMessage('Error Refreshing');
             if (refresher) refresher.complete();
         })
     }
