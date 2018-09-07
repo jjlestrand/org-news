@@ -1,9 +1,9 @@
-import {Injectable, NgZone} from '@angular/core';
+import {Injectable} from '@angular/core';
 import 'rxjs/add/operator/map';
 import {SqliteService} from "./sqlite-service";
 import {API_CHOOSER, APIs} from "../config/setting";
 
-export const viewTable = [
+export const viewsTableFields = [
     {name: 'nid', type: 'INTEGER', nullable: false, primaryKey: true},
     {name: 'field_artwork', type: 'TEXT', nullable: false, primaryKey: false},
     {name: 'field_artwork_1', type: 'TEXT', nullable: false, primaryKey: false},
@@ -25,15 +25,10 @@ export const viewTable = [
 export class MigrationService {
 
     public viewsTableFields: Array<any> = [];
-    current_db_fields: any;
+    api_fields: any;
 
     constructor(private sqliteService: SqliteService) {
-
-        this.current_db_fields = APIs[API_CHOOSER].dbFields;
-        for (let field of viewTable) {
-            let fieldName = this.current_db_fields[field.name] || field.name;
-            this.viewsTableFields.push({...field, fieldName: fieldName});
-        }
+        this.api_fields = APIs[API_CHOOSER].dbFields;
     }
 
     tables() {
@@ -52,22 +47,19 @@ export class MigrationService {
             let logs = {};
             const tables = this.tables();
             const tableNames = Object.keys(tables);
-            // for (let i = 0; i < tableNames.length; i++) {
-            //     let callbackResponse = await tables[tableNames[i]]();
-            //     console.log('callbackResponse', callbackResponse);
-            //     if (callbackResponse.result.length > 0) {
-            //         try {
-            //             let table_create_insert_response = await this.sqliteService.bulkInsertExecute(callbackResponse.result);
-            //             logs[tableNames[i]] = true
-            //         } catch (e) {
-            //             logs[tableNames[i]] = false
-            //         }
-            //     }
-            // }
-            let batchQuery = [];
-            let viewTableRes: any = await this.viewsTable();
-            batchQuery = [...batchQuery, ...viewTableRes.result];
-            let queryRes = await this.sqliteService.bulkInsertExecute(batchQuery);
+
+            for (let i = 0; i < tableNames.length; i++) {
+                let callbackResponse = await tables[tableNames[i]]();
+                if (callbackResponse.result.length > 0) {
+                    try {
+                        let table_create_insert_response = await this.sqliteService.bulkInsertExecute(callbackResponse.result);
+                        logs[tableNames[i]] = true
+                    } catch (e) {
+                        logs[tableNames[i]] = false
+                    }
+                }
+            }
+
             resolve({
                 logs: logs
             });
@@ -80,8 +72,8 @@ export class MigrationService {
             let $batchQuery = [];
             /* making create table query */
             let CREATE_TABLE_QUERY: string = 'CREATE TABLE IF NOT EXISTS views ( ';
-            this.viewsTableFields.map((field) => {
-                let extendQuery = field.fieldName + ' ' + field.type + (field.primaryKey ? ' PRIMARY KEY' : '') + ',';
+            viewsTableFields.map((field) => {
+                let extendQuery = field.name + ' ' + field.type + (field.primaryKey ? ' PRIMARY KEY' : '') + ',';
                 CREATE_TABLE_QUERY += extendQuery;
             });
             CREATE_TABLE_QUERY = CREATE_TABLE_QUERY.slice(0, -1);
@@ -89,10 +81,10 @@ export class MigrationService {
             /* create table query ready */
 
             /* table field values array and string */
-            let columnsStringArr = this.viewsTableFields.filter((field) => {
-                return field.fieldName;
+            let columnsStringArr = viewsTableFields.filter((field) => {
+                return field.name;
             }).map((field) => {
-                return field.fieldName
+                return field.name
             });
             let columnsString = columnsStringArr.toString();
             $batchQuery.push([CREATE_TABLE_QUERY, []]);
@@ -104,14 +96,14 @@ export class MigrationService {
                 string = [];
                 records.map((record) => {
                     columnsStringArr.map((field) => {
-                        if (field == this.current_db_fields.nid) {
-                            columnsValueArr.push(record[field] ? Number(record[field]) : '');
+                        if (field == 'nid') {
+                            columnsValueArr.push(record[this.api_fields[field]] ? Number(record[this.api_fields[field]]) : '');
                         } else if (field == 'favorite' || field == 'readed') {
-                            columnsValueArr.push(record[field] == 'true' ? 1 : 0);
+                            columnsValueArr.push(record[this.api_fields[field]] == 'true' ? 1 : 0);
                         } else if (field == 'last_play_duration') {
-                            columnsValueArr.push(record[field] ? record[field] : 0);
+                            columnsValueArr.push(record[this.api_fields[field]] ? record[this.api_fields[field]] : 0);
                         } else {
-                            columnsValueArr.push(record[field] ? record[field] : '');
+                            columnsValueArr.push(record[this.api_fields[field]] ? record[this.api_fields[field]] : '');
                         }
                         string.push('?');
                     });

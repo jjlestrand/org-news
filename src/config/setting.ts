@@ -1,3 +1,24 @@
+interface dbFields {
+    nid: String;
+    field_artwork: String;
+    field_artwork_1: String;
+    field_channel: String;
+    field_date: String;
+    field_image: String;
+    field_mp3: String;
+    field_photo: String;
+    field_service: String;
+    field_study_series: String;
+    title: String;
+    title_1: String;
+}
+
+interface APIData {
+    api: String;
+    domain: String;
+    dbFields: dbFields;
+}
+
 export const SETTING =  {
     database : {
         name : 'church.db',
@@ -9,7 +30,11 @@ export const MAX_FILE_SIZE = 10485760; // in bytes
 
 export const APP_MINIMIZE_LOCK_TIMEOUT_SECONDS = 20;
 
-export const APIs = [
+//  make a new instance of api in below constant.
+// api: is API URL
+// domain: URL DOMAIN
+// dbFields: Please
+export const APIs: Array<APIData> = [
     {
         api: 'ruth.savagedns.com/lbc5/rest/views/sermons?_format=json',
         domain: 'ruth.savagedns.com',
@@ -47,4 +72,4 @@ export const APIs = [
     }
 ];
 
-export const API_CHOOSER = 1;
+export const API_CHOOSER: number = 0;

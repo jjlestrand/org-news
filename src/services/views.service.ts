@@ -3,8 +3,7 @@ import {CommonService} from "./common-service";
 import {HttpClient} from "@angular/common/http";
 import {SqliteService} from "./sqlite-service";
 import {Environment} from "../environment/environment";
-import {MigrationService, viewTable} from "./migration-service";
-import {API_CHOOSER, APIs} from "../config/setting";
+import {MigrationService, viewsTableFields} from "./migration-service";
 
 export class view {
     nid: number;
@@ -28,14 +27,11 @@ export class view {
 
 export class ViewsService {
 
-    current_db_fields: any;
-
     constructor(private com: CommonService,
                 private http: HttpClient,
                 private migrationService: MigrationService,
                 private sqliteService: SqliteService) {
-        this.current_db_fields = APIs[API_CHOOSER].dbFields;
-        console.log('this.current_db_fields', this.current_db_fields);
+
     }
 
     getViews(row_count, offset) {
@@ -127,7 +123,7 @@ export class ViewsService {
     }
 
     getIds() {
-        let query = 'select ' + this.current_db_fields.nid + ' from views';
+        let query = 'select nid from views';
         return this.sqliteService.select(query);
     }
 
@@ -149,7 +145,7 @@ export class ViewsService {
             data.map((rec) => {
                 let UPDATE_QUERY: string = 'UPDATE views set ';
                 let params = [];
-                viewTable.map((field) => {
+                viewsTableFields.map((field) => {
                     if (rec.hasOwnProperty(field.name)) {
                         let extendQuery = field.name + '=?,';
                         UPDATE_QUERY += extendQuery;
@@ -157,10 +153,12 @@ export class ViewsService {
                     }
                 });
                 UPDATE_QUERY = UPDATE_QUERY.slice(0, -1); // remove last character
-                UPDATE_QUERY += ` where ${this.current_db_fields.nid}=?`;
+                UPDATE_QUERY += ' where nid=?';
                 params.push(rec.nid);
                 query.push([UPDATE_QUERY, params]);
-            });
+            })
+            console.log('query', query);
+
             resolve(query);
 
             // return this.sqliteService.bulkInsertExecute(query);
@@ -200,7 +198,7 @@ export class ViewsService {
     }
 
     removeView(nId) {
-        let query = [`delete from views where ${this.current_db_fields.nid}=?`, [nId]];
+        let query = ['delete from views where nid=?', [nId]];
         return this.sqliteService.bulkInsertExecute([query]);
     }
 
@@ -210,12 +208,12 @@ export class ViewsService {
     }
 
     toggleFavourite(nId) {
-        let query = [`update views set favorite = NOT favorite where ${this.current_db_fields.nid}=?`, [nId]];
+        let query = ['update views set favorite = NOT favorite where nid=?', [nId]];
         return this.sqliteService.bulkInsertExecute([query]);
     }
 
     setViewReaded(nId) {
-        let query = [`update views set readed = 1 where ${this.current_db_fields.nid}=?`, [nId]];
+        let query = ['update views set readed = 1 where nid=?', [nId]];
         return this.sqliteService.bulkInsertExecute([query]);
     }
 
@@ -240,18 +238,18 @@ export class ViewsService {
     }
 
     getChannelWise(channel_name) {
-        let query = `select * from views where ${this.current_db_fields.field_channel} = ` + channel_name;
+        let query = 'select * from views where field_channel = ' + channel_name;
         return this.sqliteService.select(query);
     }
 
     setPlayDuration(nid, playerDuration) {
-        let query = [`update views set last_play_duration=? where ${this.current_db_fields.nid}=?`, [parseInt(playerDuration), nid]];
+        let query = ['update views set last_play_duration=? where nid=?', [parseInt(playerDuration), nid]];
         return this.sqliteService.bulkInsertExecute([query]);
     }
 
     getLastPlayDuration(nid) {
         return new Promise((resolve => {
-            let query = `select last_play_duration from views where ${this.current_db_fields.nid} = ` + nid;
+            let query = 'select last_play_duration from views where nid = ' + nid;
             this.sqliteService.select(query)
                 .then((res: any) => resolve(res.results[0].last_play_duration || 0))
                 .catch((err) => resolve(0));

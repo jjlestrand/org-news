@@ -25,6 +25,11 @@ export interface GlobalEventPayload {
 export class MyApp {
     @ViewChild(Nav) nav: Nav;
     subscription: any;
+    is_logged_in: any;
+    user: any;
+    rootPage: any = TabsPage;
+    pages: Array<{ title: string, component: any }>;
+
     constructor(public platform: Platform,
                 public appConfigService: AppConfigService,
                 public statusBar: StatusBar,
@@ -49,11 +54,6 @@ export class MyApp {
             {title: 'List', component: ListPage}
         ];
     }
-    is_logged_in: any;
-    user: any;
-    rootPage: any = TabsPage;
-
-    pages: Array<{ title: string, component: any }>;
 
     initializeApp() {
         this.platform.ready().then(() => {
