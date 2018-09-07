@@ -25,13 +25,15 @@ import {PlayerService} from "../services/player.service";
 import {Media} from "@ionic-native/media";
 import {MusicControls} from "@ionic-native/music-controls";
 import {AppConfigService} from "../services/appConfig.service";
+import {AboutPage} from "../pages/about/about";
 
 @NgModule({
     declarations: [
         MyApp,
         HomePage,
         ListPage,
-        TabsPage
+        TabsPage,
+        AboutPage
     ],
     imports: [
         BrowserModule,
@@ -44,7 +46,8 @@ import {AppConfigService} from "../services/appConfig.service";
         MyApp,
         HomePage,
         ListPage,
-        TabsPage
+        TabsPage,
+        AboutPage
     ],
     providers: [
         AppConfigService,

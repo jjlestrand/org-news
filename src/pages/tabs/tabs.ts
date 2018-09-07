@@ -2,6 +2,7 @@ import {Component, ViewChild} from '@angular/core';
 import {Events, NavController, NavParams, Tabs} from 'ionic-angular';
 import {HomePage} from "../home/home";
 import {GlobalEventPayload} from "../../app/app.component";
+import {AboutPage} from "../about/about";
 
 @Component({
     selector: 'page-tabs',
@@ -11,9 +12,14 @@ export class TabsPage {
 
     @ViewChild('tabs') tabs: Tabs;
 
+    pages = {
+        homepage: <any>HomePage,
+        aboutpage: <any>AboutPage
+    };
+
     tabData = [
-        { name: 'Home', component: HomePage, componentName: 'HomePage' },
-        { name: 'About', component: '', componentName: '' },
+        { name: 'Home', component: this.pages.homepage, componentName: 'HomePage' },
+        { name: 'About', component: this.pages.aboutpage, componentName: 'AboutPage' },
         { name: 'Contanct', component: '', componentName: '' }
     ];
 

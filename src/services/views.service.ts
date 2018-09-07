@@ -248,7 +248,8 @@ export class ViewsService {
     }
 
     getChannelWise(channel_name) {
-        let query = 'select * from views where field_channel = ' + channel_name;
+        let query = `select * from views where field_channel = '${channel_name}'`;
+        console.log('query', query)
         return this.sqliteService.select(query);
     }
 

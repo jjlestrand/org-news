@@ -129,12 +129,14 @@ export class HomePage {
     getViewsFiltered(action, item) {
         if (action == 'reset') {
             this.pagination.offset = 0;
+            this.unBlockPagination();
             this.getViewsOffline(true);
         } else if (action == 'filter' && item == 'favorite') {
             this.viewsProvider.getAllFavorited()
                 .then((res: any) => {
                     if (res.results && res.results.length > 0) {
                         this.views = res.results;
+                        this.blockPagination();
                     } else {
                         this.com.toastMessage('No any records found with these filter');
                     }
@@ -145,6 +147,7 @@ export class HomePage {
                 .then((res: any) => {
                     if (res.results && res.results.length > 0) {
                         this.views = res.results;
+                        this.blockPagination();
                     } else {
                         this.com.toastMessage('No any records found with these filter');
                     }
@@ -155,11 +158,15 @@ export class HomePage {
                 .then((res: any) => {
                     if (res.results && res.results.length > 0) {
                         this.views = res.results;
+                        this.blockPagination();
                     } else {
                         this.com.toastMessage('No any records found with these filter');
                     }
                 })
-                .catch((err) => this.com.toastMessage('Error Filter'));
+                .catch((err) => {
+                    console.log('err', err);
+                    this.com.toastMessage('Error Filter')
+                });
         }
     }
 
@@ -177,5 +184,13 @@ export class HomePage {
             return view;
         });
         this.viewsProvider.markAllAsUnread();
+    }
+
+    blockPagination() {
+        this.pagination.loadedAll = true;
+    }
+
+    unBlockPagination() {
+        this.pagination.loadedAll = false;
     }
 }
