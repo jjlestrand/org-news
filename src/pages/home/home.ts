@@ -2,10 +2,11 @@ import {Component} from '@angular/core';
 import {NavController, Platform, PopoverController} from 'ionic-angular';
 import {view, ViewsService} from "../../services/views.service";
 import {CommonService} from "../../services/common-service";
-import {DomSanitizer, platformBrowser} from "@angular/platform-browser";
+import {DomSanitizer} from "@angular/platform-browser";
 import {EventsService} from "../../services/events.service";
 import {FilterPage} from "../filter/filter";
 import {Environment} from "../../environment/environment";
+import * as moment from "moment";
 
 @Component({
     selector: 'page-home',
@@ -192,5 +193,14 @@ export class HomePage {
 
     unBlockPagination() {
         this.pagination.loadedAll = false;
+    }
+
+    filterViews(prop: string) {
+        // return this.views.sort((a, b) => a[prop] > b[prop] ? 1 : a[prop] === b[prop] ? 0 : -1);
+        return this.views.sort((a, b) => new Date(a[prop]).getTime() - new Date(b[prop]).getTime());
+    }
+
+    parseDate(date) {
+        return moment(date).format('MMM DD, YYYY');
     }
 }

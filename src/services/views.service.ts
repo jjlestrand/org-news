@@ -6,6 +6,7 @@ import {Environment} from "../environment/environment";
 import {MigrationService, viewsTableFields} from "./migration-service";
 import {NetworkProvider} from "./network.service";
 import {API_CHOOSER, APIs} from "../config/setting";
+import * as moment from "moment";
 
 export class view {
     nid: number;
@@ -54,20 +55,27 @@ export class ViewsService {
                     try {
                         await this.removeAllExceptReadAndFavorited();
                         let storeRes = await this.storeAllDataOfflineUpdateExisted(onLineRes);
+                        console.log('storeRes', storeRes);
                     } catch (e) {
-
+                        console.log('error in storeRes', e);
                     }
                 }
             }
-            let query = 'select * from views LIMIT ' + row_count + ' OFFSET ' + offset;
+            let query = 'select * from views ORDER BY field_date DESC LIMIT ' + row_count + ' OFFSET ' + offset;
+            alert('query => ' + JSON.stringify(query));
             let recordCount: any = await this.sqliteService.select('select count(*) from views');
             recordCount = recordCount.results[0]['count(*)'] || false;
+            console.log('recordCount', recordCount);
             try {
+                console.log(query);
                 let records: any = await this.sqliteService.select(query);
+                console.log('records', records);
+
                 if (records) {
                     resolve({recordEnd: (offset + row_count) > recordCount, data: records.results})
                 }
             } catch (e) {
+                console.log('e', e);
                 reject(e);
             }
         }))
@@ -158,6 +166,9 @@ export class ViewsService {
                 let params = [];
                 viewsTableFields.map((field) => {
                     if (rec.hasOwnProperty(field.name)) {
+                        if (field.name == 'field_date') {
+                            rec[field.name] = moment(rec[field.name]).format('YYYY-MM-DD');
+                        }
                         let extendQuery = field.name + '=?,';
                         UPDATE_QUERY += extendQuery;
                         params.push(rec[field.name]);
@@ -185,8 +196,9 @@ export class ViewsService {
         return new Promise(async (resolve, reject) => {
             let query =
                 row_count ?
-                    'select * from views limit ' + row_count + ' offset ' + offset :
-                    'select * from views';
+                    'select * from views ORDER BY field_date DESC limit ' + row_count + ' offset ' + offset :
+                    'select * from views ORDER BY field_date DESC';
+
             let recordCount: any;
             try {
                 recordCount = await this.sqliteService.select('select count(*) from views');

@@ -2,6 +2,7 @@ import {Injectable} from '@angular/core';
 import 'rxjs/add/operator/map';
 import {SqliteService} from "./sqlite-service";
 import {API_CHOOSER, APIs} from "../config/setting";
+import * as moment from 'moment';
 
 export const viewsTableFields = [
     {name: 'nid', type: 'INTEGER', nullable: false, primaryKey: true},
@@ -102,6 +103,14 @@ export class MigrationService {
                             columnsValueArr.push(record[this.api_fields[field]] == 'true' ? 1 : 0);
                         } else if (field == 'last_play_duration') {
                             columnsValueArr.push(record[this.api_fields[field]] ? record[this.api_fields[field]] : 0);
+                        } else if (field == 'field_date') {
+                            let recordDate = moment().format('YYYY-MM-DD');
+                            if (record[this.api_fields[field]]) {
+                                recordDate = moment(record[this.api_fields[field]]).format('YYYY-MM-DD');
+                            }
+                            console.log('record[this.api_fields[field]]', record[this.api_fields[field]]);
+                            console.log('recordDate', recordDate);
+                            columnsValueArr.push(recordDate);
                         } else {
                             columnsValueArr.push(record[this.api_fields[field]] ? record[this.api_fields[field]] : '');
                         }
@@ -114,6 +123,7 @@ export class MigrationService {
                 });
                 console.log('$batchQuery', $batchQuery);
             }
+            console.log('resolving');
             resolve({
                 message: 'done',
                 status: true,

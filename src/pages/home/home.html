@@ -51,7 +51,7 @@
                     <div>{{ view.field_service }}</div>
                     <!--p>Article ID {{ article.id }}</p-->
                     <p>{{ view.field_channel }}</p>
-                    <p>{{ view.field_date }}</p>
+                    <p>{{ parseDate(view.field_date) }}</p>
                     <!--p>Feed: {{article.feedID}}</p-->
                 </div>
                 <button ion-button icon-only clear float-right class="important favourite_btn"

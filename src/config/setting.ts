@@ -72,4 +72,4 @@ export const APIs: Array<APIData> = [
     }
 ];
 
-export const API_CHOOSER: number = 1;
+export const API_CHOOSER: number = 0;
