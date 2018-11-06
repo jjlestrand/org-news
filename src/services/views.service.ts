@@ -62,7 +62,7 @@ export class ViewsService {
                 }
             }
             let query = 'select * from views ORDER BY field_date DESC LIMIT ' + row_count + ' OFFSET ' + offset;
-            alert('query => ' + JSON.stringify(query));
+            //alert('query => ' + JSON.stringify(query));
             let recordCount: any = await this.sqliteService.select('select count(*) from views');
             recordCount = recordCount.results[0]['count(*)'] || false;
             console.log('recordCount', recordCount);
